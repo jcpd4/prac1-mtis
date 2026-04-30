@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+    name="ControlAccesosService"
+    targetNamespace="http://practica1.com/controlaccesos"
+    xmlns:tns="http://practica1.com/controlaccesos"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- ============================================================
+         TYPES
+    ============================================================ -->
+    <wsdl:types>
+        <xs:schema targetNamespace="http://practica1.com/controlaccesos"
+                   elementFormDefault="qualified">
+
+            <!-- Tipo complejo: RegistroAcceso -->
+            <xs:complexType name="RegistroAccesoType">
+                <xs:sequence>
+                    <xs:element name="id"                type="xs:int"/>
+                    <xs:element name="nif"               type="xs:string"/>
+                    <xs:element name="codigosala"        type="xs:string"/>
+                    <xs:element name="codigodispositivo" type="xs:string"/>
+                    <xs:element name="fechahora"         type="xs:dateTime"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <!-- Tipo complejo: Lista de registros -->
+            <xs:complexType name="ListaRegistrosType">
+                <xs:sequence>
+                    <xs:element name="registro" type="tns:RegistroAccesoType"
+                                minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <!-- registrar -->
+            <xs:element name="registrar">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="nif"               type="xs:string"/>
+                        <xs:element name="codigosala"        type="xs:string"/>
+                        <xs:element name="codigodispositivo" type="xs:string"/>
+                        <xs:element name="wskey"             type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="registrarResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="resultado" type="xs:boolean"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- consultar -->
+            <xs:element name="consultar">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="nif"               type="xs:string"/>
+                        <xs:element name="codigosala"        type="xs:string"/>
+                        <xs:element name="codigodispositivo" type="xs:string"/>
+                        <xs:element name="fechaDesde"        type="xs:dateTime"/>
+                        <xs:element name="fechaHasta"        type="xs:dateTime"/>
+                        <xs:element name="wskey"             type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="consultarResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="registros" type="tns:ListaRegistrosType"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+        </xs:schema>
+    </wsdl:types>
+
+    <!-- ============================================================
+         MESSAGES
+    ============================================================ -->
+    <wsdl:message name="RegistrarRequest">
+        <wsdl:part name="parameters" element="tns:registrar"/>
+    </wsdl:message>
+    <wsdl:message name="RegistrarResponse">
+        <wsdl:part name="parameters" element="tns:registrarResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="ConsultarRequest">
+        <wsdl:part name="parameters" element="tns:consultar"/>
+    </wsdl:message>
+    <wsdl:message name="ConsultarResponse">
+        <wsdl:part name="parameters" element="tns:consultarResponse"/>
+    </wsdl:message>
+
+    <!-- ============================================================
+         PORT TYPE
+    ============================================================ -->
+    <wsdl:portType name="ControlAccesosPortType">
+        <wsdl:operation name="registrar">
+            <wsdl:input  message="tns:RegistrarRequest"/>
+            <wsdl:output message="tns:RegistrarResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="consultar">
+            <wsdl:input  message="tns:ConsultarRequest"/>
+            <wsdl:output message="tns:ConsultarResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- ============================================================
+         BINDING  (document/literal)
+    ============================================================ -->
+    <wsdl:binding name="ControlAccesosSOAPBinding" type="tns:ControlAccesosPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="registrar">
+            <soap:operation soapAction="registrar"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="consultar">
+            <soap:operation soapAction="consultar"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- ============================================================
+         SERVICE
+    ============================================================ -->
+    <wsdl:service name="ControlAccesosService">
+        <wsdl:port name="ControlAccesosPort" binding="tns:ControlAccesosSOAPBinding">
+            <soap:address location="http://localhost:8083/ws/controlaccesos"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

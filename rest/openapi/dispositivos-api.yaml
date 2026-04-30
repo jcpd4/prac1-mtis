@@ -1,0 +1,205 @@
+openapi: 3.0.3
+info:
+  title: Dispositivos API
+  description: Servicio REST para gestión de dispositivos del edificio inteligente
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8087/api
+    description: Servidor de desarrollo
+
+paths:
+
+  /dispositivos:
+    post:
+      summary: Crear nuevo dispositivo
+      operationId: nuevoDispositivo
+      parameters:
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dispositivo'
+      responses:
+        '201':
+          description: Dispositivo creado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '409':
+          description: El dispositivo ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+  /dispositivos/{codigo}:
+    get:
+      summary: Consultar dispositivo por código
+      operationId: consultarDispositivo
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dispositivo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dispositivo'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Dispositivo no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+    put:
+      summary: Modificar dispositivo
+      operationId: modificarDispositivo
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dispositivo'
+      responses:
+        '200':
+          description: Dispositivo actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Dispositivo no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+    delete:
+      summary: Borrar dispositivo
+      operationId: borrarDispositivo
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dispositivo eliminado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Dispositivo no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+components:
+  schemas:
+
+    Dispositivo:
+      type: object
+      required:
+        - codigodispositivo
+        - descripcion
+        - codigosala
+      properties:
+        codigodispositivo:
+          type: string
+          example: D001
+        descripcion:
+          type: string
+          example: Lector entrada recepción
+        codigosala:
+          type: string
+          example: S001
+
+    RespuestaOk:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: Operación realizada correctamente
+
+    RespuestaError:
+      type: object
+      properties:
+        codigo:
+          type: integer
+          example: 404
+        mensaje:
+          type: string
+          example: Descripción detallada del error

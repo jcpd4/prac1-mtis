@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+    name="ControlPresenciaService"
+    targetNamespace="http://practica1.com/controlpresencia"
+    xmlns:tns="http://practica1.com/controlpresencia"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- ============================================================
+         TYPES
+    ============================================================ -->
+    <wsdl:types>
+        <xs:schema targetNamespace="http://practica1.com/controlpresencia"
+                   elementFormDefault="qualified">
+
+            <!-- Tipo complejo: Empleado (reutilizado para la respuesta de controlEmpleadosSala) -->
+            <xs:complexType name="EmpleadoType">
+                <xs:sequence>
+                    <xs:element name="nif"           type="xs:string"/>
+                    <xs:element name="nombre"        type="xs:string"/>
+                    <xs:element name="apellidos"     type="xs:string"/>
+                    <xs:element name="email"         type="xs:string"/>
+                    <xs:element name="naf"           type="xs:string"/>
+                    <xs:element name="iban"          type="xs:string"/>
+                    <xs:element name="tipoDocumento" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <!-- Tipo complejo: Lista de empleados -->
+            <xs:complexType name="ListaEmpleadosType">
+                <xs:sequence>
+                    <xs:element name="empleado" type="tns:EmpleadoType"
+                                minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <!-- registrar -->
+            <xs:element name="registrar">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="nif"        type="xs:string"/>
+                        <xs:element name="codigosala" type="xs:string"/>
+                        <xs:element name="wskey"      type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="registrarResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="resultado" type="xs:boolean"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- eliminar -->
+            <xs:element name="eliminar">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="nif"        type="xs:string"/>
+                        <xs:element name="codigosala" type="xs:string"/>
+                        <xs:element name="wskey"      type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="eliminarResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="resultado" type="xs:boolean"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- controlEmpleadosSala -->
+            <xs:element name="controlEmpleadosSala">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="codigosala" type="xs:string"/>
+                        <xs:element name="wskey"      type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="controlEmpleadosSalaResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="empleados" type="tns:ListaEmpleadosType"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+        </xs:schema>
+    </wsdl:types>
+
+    <!-- ============================================================
+         MESSAGES
+    ============================================================ -->
+    <wsdl:message name="RegistrarRequest">
+        <wsdl:part name="parameters" element="tns:registrar"/>
+    </wsdl:message>
+    <wsdl:message name="RegistrarResponse">
+        <wsdl:part name="parameters" element="tns:registrarResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="EliminarRequest">
+        <wsdl:part name="parameters" element="tns:eliminar"/>
+    </wsdl:message>
+    <wsdl:message name="EliminarResponse">
+        <wsdl:part name="parameters" element="tns:eliminarResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="ControlEmpleadosSalaRequest">
+        <wsdl:part name="parameters" element="tns:controlEmpleadosSala"/>
+    </wsdl:message>
+    <wsdl:message name="ControlEmpleadosSalaResponse">
+        <wsdl:part name="parameters" element="tns:controlEmpleadosSalaResponse"/>
+    </wsdl:message>
+
+    <!-- ============================================================
+         PORT TYPE
+    ============================================================ -->
+    <wsdl:portType name="ControlPresenciaPortType">
+        <wsdl:operation name="registrar">
+            <wsdl:input  message="tns:RegistrarRequest"/>
+            <wsdl:output message="tns:RegistrarResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="eliminar">
+            <wsdl:input  message="tns:EliminarRequest"/>
+            <wsdl:output message="tns:EliminarResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="controlEmpleadosSala">
+            <wsdl:input  message="tns:ControlEmpleadosSalaRequest"/>
+            <wsdl:output message="tns:ControlEmpleadosSalaResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- ============================================================
+         BINDING  (document/literal)
+    ============================================================ -->
+    <wsdl:binding name="ControlPresenciaSOAPBinding" type="tns:ControlPresenciaPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="registrar">
+            <soap:operation soapAction="registrar"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="eliminar">
+            <soap:operation soapAction="eliminar"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="controlEmpleadosSala">
+            <soap:operation soapAction="controlEmpleadosSala"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- ============================================================
+         SERVICE
+    ============================================================ -->
+    <wsdl:service name="ControlPresenciaService">
+        <wsdl:port name="ControlPresenciaPort" binding="tns:ControlPresenciaSOAPBinding">
+            <soap:address location="http://localhost:8084/ws/controlpresencia"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

@@ -1,0 +1,201 @@
+openapi: 3.0.3
+info:
+  title: Niveles API
+  description: Servicio REST para gestión de niveles de seguridad del edificio inteligente
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8086/api
+    description: Servidor de desarrollo
+
+paths:
+
+  /niveles:
+    post:
+      summary: Crear nuevo nivel
+      operationId: nuevoNivel
+      parameters:
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Nivel'
+      responses:
+        '201':
+          description: Nivel creado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '409':
+          description: El nivel ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+  /niveles/{nivel}:
+    get:
+      summary: Consultar nivel
+      operationId: consultarNivel
+      parameters:
+        - name: nivel
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Nivel encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Nivel'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Nivel no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+    put:
+      summary: Modificar nivel
+      operationId: modificarNivel
+      parameters:
+        - name: nivel
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Nivel'
+      responses:
+        '200':
+          description: Nivel actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Nivel no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+    delete:
+      summary: Borrar nivel
+      operationId: borrarNivel
+      parameters:
+        - name: nivel
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Nivel eliminado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Nivel no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+components:
+  schemas:
+
+    Nivel:
+      type: object
+      required:
+        - nivel
+        - descripcion
+      properties:
+        nivel:
+          type: integer
+          example: 1
+        descripcion:
+          type: string
+          example: Acceso general
+
+    RespuestaOk:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: Operación realizada correctamente
+
+    RespuestaError:
+      type: object
+      properties:
+        codigo:
+          type: integer
+          example: 404
+        mensaje:
+          type: string
+          example: Descripción detallada del error

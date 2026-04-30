@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+    name="EmpleadosService"
+    targetNamespace="http://practica1.com/empleados"
+    xmlns:tns="http://practica1.com/empleados"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- ============================================================
+         TYPES
+    ============================================================ -->
+    <wsdl:types>
+        <xs:schema targetNamespace="http://practica1.com/empleados"
+                   elementFormDefault="qualified">
+
+            <!-- Tipo complejo: Empleado -->
+            <xs:complexType name="EmpleadoType">
+                <xs:sequence>
+                    <xs:element name="nif"           type="xs:string"/>
+                    <xs:element name="nombre"        type="xs:string"/>
+                    <xs:element name="apellidos"     type="xs:string"/>
+                    <xs:element name="email"         type="xs:string"/>
+                    <xs:element name="naf"           type="xs:string"/>
+                    <xs:element name="iban"          type="xs:string"/>
+                    <xs:element name="tipoDocumento" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+
+            <!-- nuevo -->
+            <xs:element name="nuevo">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="empleado" type="tns:EmpleadoType"/>
+                        <xs:element name="wskey"    type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="nuevoResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="resultado" type="xs:boolean"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- borrar -->
+            <xs:element name="borrar">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="nif"   type="xs:string"/>
+                        <xs:element name="wskey" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="borrarResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="resultado" type="xs:boolean"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- modificar -->
+            <xs:element name="modificar">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="empleado" type="tns:EmpleadoType"/>
+                        <xs:element name="wskey"    type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="modificarResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="resultado" type="xs:boolean"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- consultar -->
+            <xs:element name="consultar">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="nif"   type="xs:string"/>
+                        <xs:element name="wskey" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="consultarResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="empleado" type="tns:EmpleadoType" minOccurs="0"/>
+                        <xs:element name="mensaje"  type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+        </xs:schema>
+    </wsdl:types>
+
+    <!-- ============================================================
+         MESSAGES
+    ============================================================ -->
+    <wsdl:message name="NuevoRequest">
+        <wsdl:part name="parameters" element="tns:nuevo"/>
+    </wsdl:message>
+    <wsdl:message name="NuevoResponse">
+        <wsdl:part name="parameters" element="tns:nuevoResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="BorrarRequest">
+        <wsdl:part name="parameters" element="tns:borrar"/>
+    </wsdl:message>
+    <wsdl:message name="BorrarResponse">
+        <wsdl:part name="parameters" element="tns:borrarResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="ModificarRequest">
+        <wsdl:part name="parameters" element="tns:modificar"/>
+    </wsdl:message>
+    <wsdl:message name="ModificarResponse">
+        <wsdl:part name="parameters" element="tns:modificarResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="ConsultarRequest">
+        <wsdl:part name="parameters" element="tns:consultar"/>
+    </wsdl:message>
+    <wsdl:message name="ConsultarResponse">
+        <wsdl:part name="parameters" element="tns:consultarResponse"/>
+    </wsdl:message>
+
+    <!-- ============================================================
+         PORT TYPE
+    ============================================================ -->
+    <wsdl:portType name="EmpleadosPortType">
+        <wsdl:operation name="nuevo">
+            <wsdl:input  message="tns:NuevoRequest"/>
+            <wsdl:output message="tns:NuevoResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="borrar">
+            <wsdl:input  message="tns:BorrarRequest"/>
+            <wsdl:output message="tns:BorrarResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="modificar">
+            <wsdl:input  message="tns:ModificarRequest"/>
+            <wsdl:output message="tns:ModificarResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="consultar">
+            <wsdl:input  message="tns:ConsultarRequest"/>
+            <wsdl:output message="tns:ConsultarResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- ============================================================
+         BINDING  (document/literal)
+    ============================================================ -->
+    <wsdl:binding name="EmpleadosSOAPBinding" type="tns:EmpleadosPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="nuevo">
+            <soap:operation soapAction="nuevo"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="borrar">
+            <soap:operation soapAction="borrar"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="modificar">
+            <soap:operation soapAction="modificar"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="consultar">
+            <soap:operation soapAction="consultar"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- ============================================================
+         SERVICE
+    ============================================================ -->
+    <wsdl:service name="EmpleadosService">
+        <wsdl:port name="EmpleadosPort" binding="tns:EmpleadosSOAPBinding">
+            <soap:address location="http://localhost:8082/ws/empleados"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

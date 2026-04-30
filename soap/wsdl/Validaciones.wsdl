@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+    name="ValidacionesService"
+    targetNamespace="http://practica1.com/validaciones"
+    xmlns:tns="http://practica1.com/validaciones"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- ============================================================
+         TYPES
+    ============================================================ -->
+    <wsdl:types>
+        <xs:schema targetNamespace="http://practica1.com/validaciones"
+                   elementFormDefault="qualified">
+
+            <!-- validarNIF -->
+            <xs:element name="validarNIF">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="nif"    type="xs:string"/>
+                        <xs:element name="wskey"  type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="validarNIFResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="resultado" type="xs:boolean"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- validarNIE -->
+            <xs:element name="validarNIE">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="nie"   type="xs:string"/>
+                        <xs:element name="wskey" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="validarNIEResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="resultado" type="xs:boolean"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- validarNAF -->
+            <xs:element name="validarNAF">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="naf"   type="xs:string"/>
+                        <xs:element name="wskey" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="validarNAFResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="resultado" type="xs:boolean"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- validarIBAN -->
+            <xs:element name="validarIBAN">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="iban"  type="xs:string"/>
+                        <xs:element name="wskey" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="validarIBANResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="resultado" type="xs:boolean"/>
+                        <xs:element name="mensaje"   type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+        </xs:schema>
+    </wsdl:types>
+
+    <!-- ============================================================
+         MESSAGES
+    ============================================================ -->
+    <wsdl:message name="ValidarNIFRequest">
+        <wsdl:part name="parameters" element="tns:validarNIF"/>
+    </wsdl:message>
+    <wsdl:message name="ValidarNIFResponse">
+        <wsdl:part name="parameters" element="tns:validarNIFResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="ValidarNIERequest">
+        <wsdl:part name="parameters" element="tns:validarNIE"/>
+    </wsdl:message>
+    <wsdl:message name="ValidarNIEResponse">
+        <wsdl:part name="parameters" element="tns:validarNIEResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="ValidarNAFRequest">
+        <wsdl:part name="parameters" element="tns:validarNAF"/>
+    </wsdl:message>
+    <wsdl:message name="ValidarNAFResponse">
+        <wsdl:part name="parameters" element="tns:validarNAFResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="ValidarIBANRequest">
+        <wsdl:part name="parameters" element="tns:validarIBAN"/>
+    </wsdl:message>
+    <wsdl:message name="ValidarIBANResponse">
+        <wsdl:part name="parameters" element="tns:validarIBANResponse"/>
+    </wsdl:message>
+
+    <!-- ============================================================
+         PORT TYPE
+    ============================================================ -->
+    <wsdl:portType name="ValidacionesPortType">
+        <wsdl:operation name="validarNIF">
+            <wsdl:input  message="tns:ValidarNIFRequest"/>
+            <wsdl:output message="tns:ValidarNIFResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="validarNIE">
+            <wsdl:input  message="tns:ValidarNIERequest"/>
+            <wsdl:output message="tns:ValidarNIEResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="validarNAF">
+            <wsdl:input  message="tns:ValidarNAFRequest"/>
+            <wsdl:output message="tns:ValidarNAFResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="validarIBAN">
+            <wsdl:input  message="tns:ValidarIBANRequest"/>
+            <wsdl:output message="tns:ValidarIBANResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- ============================================================
+         BINDING  (document/literal)
+    ============================================================ -->
+    <wsdl:binding name="ValidacionesSOAPBinding" type="tns:ValidacionesPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="validarNIF">
+            <soap:operation soapAction="validarNIF"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="validarNIE">
+            <soap:operation soapAction="validarNIE"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="validarNAF">
+            <soap:operation soapAction="validarNAF"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="validarIBAN">
+            <soap:operation soapAction="validarIBAN"/>
+            <wsdl:input><soap:body use="literal"/></wsdl:input>
+            <wsdl:output><soap:body use="literal"/></wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- ============================================================
+         SERVICE
+    ============================================================ -->
+    <wsdl:service name="ValidacionesService">
+        <wsdl:port name="ValidacionesPort" binding="tns:ValidacionesSOAPBinding">
+            <soap:address location="http://localhost:8081/ws/validaciones"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

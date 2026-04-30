@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: Salas API
+  description: Servicio REST para gestión de salas del edificio inteligente
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8085/api
+    description: Servidor de desarrollo
+
+paths:
+
+  /salas:
+    post:
+      summary: Crear nueva sala
+      operationId: nuevaSala
+      parameters:
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Clave de autenticación del servicio web
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sala'
+      responses:
+        '201':
+          description: Sala creada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '409':
+          description: La sala ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+  /salas/{codigosala}:
+    get:
+      summary: Consultar sala por código
+      operationId: consultarSala
+      parameters:
+        - name: codigosala
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sala encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sala'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Sala no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+    put:
+      summary: Modificar sala
+      operationId: modificarSala
+      parameters:
+        - name: codigosala
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sala'
+      responses:
+        '200':
+          description: Sala actualizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Sala no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+    delete:
+      summary: Borrar sala
+      operationId: borrarSala
+      parameters:
+        - name: codigosala
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sala eliminada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Sala no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+components:
+  schemas:
+
+    Sala:
+      type: object
+      required:
+        - codigosala
+        - nombre
+        - nivel
+      properties:
+        codigosala:
+          type: string
+          example: S001
+        nombre:
+          type: string
+          example: Recepción
+        nivel:
+          type: integer
+          example: 1
+
+    RespuestaOk:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: Operación realizada correctamente
+
+    RespuestaError:
+      type: object
+      properties:
+        codigo:
+          type: integer
+          example: 400
+        mensaje:
+          type: string
+          example: Descripción detallada del error

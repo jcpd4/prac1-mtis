@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: Notificaciones API
+  description: Servicio REST para envío de notificaciones por email del edificio inteligente
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8088/api
+    description: Servidor de desarrollo
+
+paths:
+
+  /notificaciones/presencia-sala:
+    post:
+      summary: Notificar por email a los empleados presentes en salas
+      description: >
+        Envía un email a cada empleado presente en alguna sala indicando el nombre de la sala.
+        Obtiene los datos de controlpresencia, empleados y salas.
+      operationId: notificarPresenciaSala
+      parameters:
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notificaciones enviadas correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '500':
+          description: Error al enviar notificaciones
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+  /notificaciones/usuario-valido/{nif}:
+    post:
+      summary: Notificar por email si un empleado es válido
+      description: >
+        Envía un email al empleado identificado por su NIF indicando si es válido.
+        Obtiene el email de la tabla empleados.
+      operationId: notificarUsuarioValido
+      parameters:
+        - name: nif
+          in: path
+          required: true
+          schema:
+            type: string
+          description: NIF del empleado
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notificación enviada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Empleado no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '500':
+          description: Error al enviar notificación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+  /notificaciones/error:
+    post:
+      summary: Notificar un error por email a un empleado
+      description: Envía un email al empleado indicado con el mensaje de error recibido.
+      operationId: notificarError
+      parameters:
+        - name: wskey
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificacionError'
+      responses:
+        '200':
+          description: Notificación de error enviada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaOk'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '401':
+          description: WSKey inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '404':
+          description: Empleado no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+        '500':
+          description: Error al enviar notificación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespuestaError'
+
+components:
+  schemas:
+
+    NotificacionError:
+      type: object
+      required:
+        - nif
+        - error
+      properties:
+        nif:
+          type: string
+          description: NIF del empleado destinatario
+          example: 33900165M
+        error:
+          type: string
+          description: Mensaje de error a notificar
+          example: Error al procesar el acceso a la sala S003
+
+    RespuestaOk:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: Notificación enviada correctamente
+
+    RespuestaError:
+      type: object
+      properties:
+        codigo:
+          type: integer
+          example: 401
+        mensaje:
+          type: string
+          example: Descripción detallada del error

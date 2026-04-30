@@ -1,0 +1,397 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{microtype}
+
+\geometry{
+  top=2.5cm,
+  bottom=2.5cm,
+  left=3cm,
+  right=3cm
+}
+
+% Colores para código
+\definecolor{codebackground}{rgb}{0.96,0.96,0.96}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codeblue}{rgb}{0.0,0.27,0.68}
+\definecolor{codegreen}{rgb}{0.0,0.50,0.0}
+
+\lstset{
+  backgroundcolor=\color{codebackground},
+  basicstyle=\ttfamily\small,
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  commentstyle=\color{codegreen},
+  keywordstyle=\color{codeblue}\bfseries,
+  stringstyle=\color{orange},
+  numberstyle=\tiny\color{codegray},
+  numbers=left,
+  stepnumber=1,
+  tabsize=2,
+  frame=single,
+  rulecolor=\color{gray!30},
+  xleftmargin=1.5em,
+  framexleftmargin=1.5em,
+  showstringspaces=false
+}
+
+\lstdefinelanguage{XML}{
+  morestring=[b]",
+  morestring=[s]{>}{<},
+  morecomment=[s]{<?}{?>},
+  stringstyle=\color{orange},
+  identifierstyle=\color{codeblue},
+  keywordstyle=\color{codeblue}\bfseries,
+  morekeywords={xmlns,version,type,name,binding,message,operation,
+                portType,service,port,element,complexType,sequence}
+}
+
+\lstdefinelanguage{YAML}{
+  keywords={true,false,null},
+  keywordstyle=\color{codeblue}\bfseries,
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{codegreen},
+  morestring=[b]',
+  morestring=[b]",
+  stringstyle=\color{orange}
+}
+
+% Cabecera y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Práctica 1 -- Interoperabilidad de Servicios Web}
+\fancyhead[R]{\small MTIS}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Formato de secciones
+\titleformat{\section}{\Large\bfseries}{}{0em}{\thesection\quad}
+\titleformat{\subsection}{\large\bfseries}{}{0em}{\thesubsection\quad}
+\titleformat{\subsubsection}{\normalsize\bfseries}{}{0em}{\thesubsubsection\quad}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=codeblue,
+  urlcolor=codeblue,
+  citecolor=codeblue
+}
+
+% =========================================================
+\begin{document}
+% =========================================================
+
+% Portada
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+
+  {\LARGE\bfseries Modelado y Tecnologías de Integración de Sistemas}\\[0.5cm]
+  {\large Práctica Individual}\\[2cm]
+
+  \rule{\linewidth}{0.5pt}\\[0.4cm]
+  {\huge\bfseries Práctica 1}\\[0.3cm]
+  {\Large Interoperabilidad de Servicios Web}\\[0.3cm]
+  {\large Sistema de Gestión de Edificio Inteligente}\\
+  \rule{\linewidth}{0.5pt}\\[2cm]
+
+  \begin{tabular}{rl}
+    \textbf{Alumno:}    & Juan Ponce de León Ruiz \\[0.3cm]
+    \textbf{Correo:}    & juankyleonruiz@gmail.com \\[0.3cm]
+    \textbf{Fecha:}     & Abril de 2026 \\
+  \end{tabular}
+
+  \vfill
+
+  {\small Documento generado como memoria descriptiva de la Práctica 1.}
+\end{titlepage}
+
+% Índice
+\tableofcontents
+\newpage
+
+% =========================================================
+\section{Introducción}
+% =========================================================
+
+Esta memoria documenta el desarrollo de la Práctica 1 de la asignatura \textbf{Modelado y Tecnologías de Integración de Sistemas (MTIS)}, cuyo objetivo es implementar un sistema distribuido de gestión de edificio inteligente haciendo uso de dos paradigmas de servicios web: \textbf{SOAP} y \textbf{REST}.
+
+El dominio del problema se centra en la gestión de empleados, el control de acceso a salas y el seguimiento de presencia dentro de un edificio, integrando además un servicio de notificaciones por correo electrónico.
+
+La práctica ha supuesto un primer contacto directo con la creación de servicios web interoperables desde cero: definición de contratos (WSDL y OpenAPI), implementación de la lógica de negocio y despliegue de múltiples servicios que comparten una misma base de datos.
+
+% =========================================================
+\section{Arquitectura del Sistema}
+% =========================================================
+
+El sistema está compuesto por \textbf{ocho microservicios independientes}, divididos en dos grupos según el protocolo que implementan.
+
+\subsection{Servicios SOAP}
+
+Los servicios SOAP siguen un enfoque \textit{contract-first}: primero se define el contrato WSDL y a partir de él se genera el código Java mediante el plugin de Apache CXF.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{llc}
+    \toprule
+    \textbf{Servicio} & \textbf{Responsabilidad} & \textbf{Puerto} \\
+    \midrule
+    \texttt{servicio-validaciones}     & Validación de NIF, NIE, NAF e IBAN & 8081 \\
+    \texttt{servicio-empleados}        & CRUD de empleados                   & 8082 \\
+    \texttt{servicio-control-accesos}  & Registro y consulta de accesos      & 8083 \\
+    \texttt{servicio-control-presencia}& Seguimiento de presencia en salas   & 8084 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Servicios SOAP del sistema}
+\end{table}
+
+\subsection{Servicios REST}
+
+Los servicios REST se documentan mediante especificaciones OpenAPI 3.0.3 y exponen recursos a través de las operaciones HTTP estándar (GET, POST, PUT, DELETE).
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{llc}
+    \toprule
+    \textbf{Servicio} & \textbf{Responsabilidad} & \textbf{Puerto} \\
+    \midrule
+    \texttt{servicio-salas}         & Gestión de salas del edificio   & 8085 \\
+    \texttt{servicio-niveles}       & Gestión de niveles de acceso    & 8086 \\
+    \texttt{servicio-dispositivos}  & Gestión de dispositivos físicos & 8087 \\
+    \texttt{servicio-notificaciones}& Envío de notificaciones por email & 8088 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Servicios REST del sistema}
+\end{table}
+
+\subsection{Infraestructura de soporte}
+
+Además de los servicios, el proyecto incluye:
+
+\begin{itemize}
+  \item \textbf{Base de datos MySQL} (\texttt{edificio\_inteligente}): almacena todas las entidades del dominio y las claves de autenticación (\textit{wskeys}).
+  \item \textbf{Mailpit}: servidor SMTP local (puerto 1025) con interfaz web (puerto 8025) para inspeccionar los correos generados por el servicio de notificaciones.
+  \item \textbf{Cliente de pruebas} (\texttt{ClienteMain.java}): aplicación Java que ejercita todos los servicios automáticamente.
+\end{itemize}
+
+% =========================================================
+\section{Tecnologías Utilizadas}
+% =========================================================
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    \textbf{Tecnología} & \textbf{Uso} \\
+    \midrule
+    Java 21             & Lenguaje de implementación \\
+    Spring Boot 3.2.3   & Framework base de todos los servicios \\
+    Apache CXF 4.0.3    & Motor JAX-WS para servicios SOAP \\
+    Spring Data JPA     & Acceso a base de datos (ORM) \\
+    MySQL 8             & Base de datos relacional compartida \\
+    Spring Mail         & Envío de notificaciones por email \\
+    Maven               & Gestión de dependencias y ciclo de build \\
+    Mailpit             & Servidor SMTP local para desarrollo \\
+    SoapUI              & Pruebas manuales de servicios SOAP \\
+    Postman             & Pruebas manuales de servicios REST \\
+    \bottomrule
+  \end{tabular}
+  \caption{Tecnologías y herramientas empleadas}
+\end{table}
+
+% =========================================================
+\section{Implementación de los Servicios SOAP}
+% =========================================================
+
+\subsection{Enfoque contract-first y generación de código}
+
+Para los servicios SOAP se ha seguido el enfoque \textit{contract-first}: el WSDL es el punto de partida, y el plugin \texttt{cxf-codegen-plugin} de Maven genera automáticamente las interfaces y clases de datos en tiempo de compilación. Esto garantiza que la implementación cumple exactamente el contrato publicado.
+
+La estructura de cada servicio SOAP es:
+
+\begin{verbatim}
+servicio-X/
+├── src/main/resources/wsdl/   <-- Contrato WSDL
+├── src/main/java/.../config/  <-- Configuración del endpoint CXF
+├── src/main/java/.../impl/    <-- Lógica de negocio (PortType)
+├── src/main/java/.../model/   <-- Entidades JPA
+└── src/main/java/.../repository/ <-- Repositorios Spring Data
+\end{verbatim}
+
+\subsection{Autenticación con WSKey}
+
+Todos los servicios, tanto SOAP como REST, requieren una clave de servicio (\textit{wskey}) que se valida contra la tabla \texttt{wskeys} de la base de datos. Si la clave no existe o no es válida, el servicio devuelve un error de autenticación sin procesar la petición.
+
+\subsection{Patrón Holder en JAX-WS}
+
+Una particularidad de la implementación SOAP es el uso del patrón \texttt{Holder<T>} de JAX-WS para los parámetros de salida. Dado que Java no permite valores de retorno múltiples de forma nativa, los parámetros anotados con \texttt{@WebParam(mode = Mode.OUT)} se pasan como \texttt{Holder<T>}, lo que el framework mapea correctamente al XML de respuesta del SOAP.
+
+\begin{lstlisting}[language=Java, caption={Ejemplo de firma con Holder (ValidacionesImpl)}]
+@Override
+public void validarNIF(
+    @WebParam(name = "wskey") String wskey,
+    @WebParam(name = "nif")   String nif,
+    @WebParam(name = "resultado", mode = Mode.OUT)
+        Holder<Boolean> resultado,
+    @WebParam(name = "mensaje", mode = Mode.OUT)
+        Holder<String> mensaje) {
+
+    if (!wskeyRepository.existsByClave(wskey)) {
+        resultado.value = false;
+        mensaje.value = "WSKey no válida";
+        return;
+    }
+    // ... lógica de validación
+}
+\end{lstlisting}
+
+\subsection{Validaciones de documentos españoles}
+
+El servicio \texttt{servicio-validaciones} implementa algoritmos de verificación para cuatro tipos de documentos:
+
+\begin{itemize}
+  \item \textbf{NIF}: 8 dígitos + 1 letra verificadora (módulo 23 sobre la tabla de letras \texttt{TRWAGMYFPDXBNJZSQVHLCKE}).
+  \item \textbf{NIE}: letra inicial (X/Y/Z) + 7 dígitos + letra verificadora (mismo algoritmo que NIF, sustituyendo X$\to$0, Y$\to$1, Z$\to$2).
+  \item \textbf{NAF}: 12 dígitos; los dos últimos son el módulo 97 de los diez primeros.
+  \item \textbf{IBAN}: 24 caracteres (ES + 22 dígitos); verificación según ISO 13616 (reordenamiento y módulo 97).
+\end{itemize}
+
+% =========================================================
+\section{Implementación de los Servicios REST}
+% =========================================================
+
+\subsection{Diseño de recursos y especificación OpenAPI}
+
+Los servicios REST exponen recursos siguiendo las convenciones HTTP. Cada servicio cuenta con su especificación OpenAPI 3.0.3 en formato YAML, que documenta todos los endpoints, parámetros, cuerpos de petición y respuestas posibles antes de escribir una sola línea de código Java.
+
+Ejemplo de estructura de endpoints para \texttt{servicio-salas}:
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{Método} & \textbf{Ruta} & \textbf{Descripción} \\
+    \midrule
+    GET    & \texttt{/api/salas/\{codigosala\}} & Obtener una sala \\
+    POST   & \texttt{/api/salas}                & Crear sala \\
+    PUT    & \texttt{/api/salas/\{codigosala\}} & Actualizar sala \\
+    DELETE & \texttt{/api/salas/\{codigosala\}} & Eliminar sala \\
+    \bottomrule
+  \end{tabular}
+  \caption{Endpoints del servicio de salas}
+\end{table}
+
+\subsection{Respuestas estandarizadas}
+
+Todos los servicios REST devuelven un objeto JSON con los campos \texttt{codigo} y \texttt{mensaje}, además del dato solicitado en operaciones de consulta. Los códigos de estado HTTP son los estándar: \texttt{200 OK}, \texttt{201 Created}, \texttt{400 Bad Request}, \texttt{401 Unauthorized}, \texttt{404 Not Found} y \texttt{409 Conflict}.
+
+\subsection{Servicio de notificaciones}
+
+El servicio \texttt{servicio-notificaciones} utiliza \texttt{Spring Mail} para enviar correos electrónicos en tres situaciones:
+
+\begin{enumerate}
+  \item Validación exitosa de un usuario (\texttt{/api/notificaciones/usuario-valido/\{nif\}}).
+  \item Notificación de error (\texttt{/api/notificaciones/error}).
+  \item Cambio de presencia en una sala (\texttt{/api/notificaciones/presencia-sala}).
+\end{enumerate}
+
+En el entorno de desarrollo se emplea Mailpit como servidor SMTP local, lo que permite verificar los correos sin necesidad de un servidor real.
+
+% =========================================================
+\section{Modelo de Datos}
+% =========================================================
+
+La base de datos MySQL \texttt{edificio\_inteligente} contiene las siguientes tablas principales:
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{Tabla} & \textbf{Clave primaria} & \textbf{Descripción} \\
+    \midrule
+    \texttt{empleados}       & \texttt{nif}                       & Datos de los empleados \\
+    \texttt{niveles}         & \texttt{nivel} (entero)            & Niveles de acceso \\
+    \texttt{salas}           & \texttt{codigosala}                & Salas del edificio \\
+    \texttt{dispositivos}    & \texttt{codigodispositivo}         & Dispositivos de control \\
+    \texttt{controlaccesos}  & \texttt{id} (autoincremental)      & Historial de accesos \\
+    \texttt{controlpresencia}& \texttt{(nif, codigosala)}         & Presencia actual \\
+    \texttt{wskeys}          & \texttt{id} (autoincremental)      & Claves de autenticación \\
+    \bottomrule
+  \end{tabular}
+  \caption{Tablas de la base de datos}
+\end{table}
+
+La tabla \texttt{controlpresencia} usa una clave primaria compuesta \texttt{(nif, codigosala)} para garantizar que cada empleado solo puede estar registrado una vez en cada sala al mismo tiempo.
+
+% =========================================================
+\section{Pruebas}
+% =========================================================
+
+\subsection{Pruebas manuales}
+
+Las pruebas manuales se realizan con dos herramientas:
+
+\begin{itemize}
+  \item \textbf{SoapUI}: para los servicios SOAP. Se construyen peticiones XML con la wskey correcta e incorrecta, verificando tanto el flujo nominal como los casos de error (NIF inválido, empleado no existente, clave duplicada, etc.).
+  \item \textbf{Postman}: para los servicios REST. Se cubren todos los verbos HTTP y se verifica que los códigos de estado de respuesta son los esperados.
+  \item \textbf{Mailpit} (interfaz web en \texttt{http://localhost:8025}): para confirmar que los correos generados por el servicio de notificaciones llegan correctamente.
+\end{itemize}
+
+\subsection{Cliente de pruebas automáticas}
+
+El módulo \texttt{cliente/} contiene la clase \texttt{ClienteMain.java}, que ejercita todos los servicios de forma secuencial. Para los servicios SOAP utiliza \texttt{JaxWsProxyFactoryBean} de Apache CXF; para los REST, el cliente HTTP nativo de Java (\texttt{java.net.http.HttpClient}).
+
+% =========================================================
+\section{Dificultades Encontradas y Aprendizajes}
+% =========================================================
+
+Esta práctica ha sido mi primer desarrollo completo de servicios web interoperables, lo que ha implicado un proceso de aprendizaje progresivo en varias áreas.
+
+\subsection{SOAP y JAX-WS}
+
+El principal obstáculo con SOAP fue comprender el modelo de programación de JAX-WS, en particular el patrón \texttt{Holder<T>} para parámetros de salida. Inicialmente intenté devolver los valores de respuesta directamente como resultado del método, lo que no funciona cuando el WSDL define múltiples parámetros de salida. Una vez entendido que JAX-WS mapea los \texttt{OUT} parameters mediante \texttt{Holder}, la implementación resultó coherente con el contrato.
+
+También fue necesario entender la diferencia entre el enfoque \textit{contract-first} (WSDL $\to$ código) y el enfoque \textit{code-first} (código $\to$ WSDL), y por qué el primero es preferible en entornos de interoperabilidad real.
+
+\subsection{REST y OpenAPI}
+
+La parte REST fue más accesible gracias a la familiaridad con Spring MVC. La principal lección fue la importancia de diseñar bien el contrato OpenAPI antes de implementar, ya que los cambios posteriores en los endpoints obligan a actualizar tanto el código como la especificación.
+
+\subsection{Configuración del entorno}
+
+La gestión de ocho servicios independientes, cada uno con su propio puerto y configuración, exigió atención en el orden de arranque (la base de datos debe estar disponible antes que cualquier servicio) y en la consistencia de las credenciales en todos los \texttt{application.properties}.
+
+Un error concreto fue configurar el puerto SMTP a 25 en lugar de 1025 (el que usa Mailpit por defecto). Detectarlo requirió revisar los logs de Spring Mail y consultar la documentación de Mailpit.
+
+\subsection{Validaciones de documentos}
+
+Implementar los algoritmos de validación de NIF, NIE, NAF e IBAN desde cero supuso revisar la normativa española correspondiente y contrastar los resultados con validadores externos para asegurar la corrección de los cálculos.
+
+\subsection{Reflexión general}
+
+La práctica ha permitido comprender en la práctica por qué la interoperabilidad es un problema relevante en sistemas distribuidos: cuando los servicios están implementados con tecnologías distintas, el contrato (WSDL u OpenAPI) es el único elemento que garantiza que un cliente puede comunicarse con un servidor sin conocer sus detalles internos. Haber trabajado con ambos paradigmas en paralelo ha hecho más clara la diferencia en su filosofía de diseño: SOAP orientado a operaciones, REST orientado a recursos.
+
+% =========================================================
+\section{Conclusiones}
+% =========================================================
+
+La Práctica 1 ha resultado en un sistema funcional compuesto por ocho servicios web que cubren las necesidades de gestión de un edificio inteligente. Los objetivos planteados ---implementar servicios SOAP y REST, definir contratos previos a la implementación, compartir una base de datos relacional y añadir autenticación mediante wskey--- se han cumplido en su totalidad.
+
+Desde el punto de vista formativo, el desarrollo ha consolidado conceptos teóricos de la asignatura sobre interoperabilidad y ha introducido el uso de herramientas y frameworks habituales en el sector profesional (Apache CXF, Spring Boot, OpenAPI). La experiencia de depurar un sistema distribuido con múltiples servicios ha sido también un aprendizaje valioso, ya que los errores pueden originarse en cualquier capa (red, configuración, lógica de negocio) y localizarlos requiere una metodología ordenada.
+
+\end{document}

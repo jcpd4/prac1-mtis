@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memoria Práctica 1 – MTIS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Source+Code+Pro:wght@400;500&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 11.5pt;
+      color: #1a1a1a;
+      line-height: 1.65;
+      background: white;
+    }
+
+    @media print {
+      body { font-size: 11pt; }
+      .page-break { page-break-after: always; }
+      h1, h2, h3 { page-break-after: avoid; }
+      table, figure { page-break-inside: avoid; }
+      pre, code { font-size: 9pt; }
+    }
+
+    .container {
+      max-width: 170mm;
+      margin: 0 auto;
+      padding: 20mm 0;
+    }
+
+    /* ---- PORTADA ---- */
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40mm 20mm;
+    }
+
+    .cover-subject {
+      font-size: 14pt;
+      font-weight: 600;
+      color: #333;
+      letter-spacing: 0.02em;
+      margin-bottom: 4pt;
+    }
+
+    .cover-type {
+      font-size: 11pt;
+      color: #666;
+      margin-bottom: 30pt;
+    }
+
+    .cover-rule {
+      width: 100%;
+      border: none;
+      border-top: 1.5px solid #333;
+      margin: 10pt 0;
+    }
+
+    .cover-title {
+      font-size: 28pt;
+      font-weight: 700;
+      margin: 10pt 0 4pt;
+    }
+
+    .cover-subtitle {
+      font-size: 16pt;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 4pt;
+    }
+
+    .cover-domain {
+      font-size: 12pt;
+      color: #555;
+      margin-bottom: 20pt;
+    }
+
+    .cover-meta {
+      width: 100%;
+      margin-top: 30pt;
+    }
+
+    .cover-meta table {
+      margin: 0 auto;
+      border: none;
+    }
+
+    .cover-meta td {
+      padding: 4pt 8pt;
+      border: none;
+      text-align: left;
+    }
+
+    .cover-meta td:first-child {
+      font-weight: 600;
+      color: #333;
+      white-space: nowrap;
+    }
+
+    .cover-note {
+      margin-top: auto;
+      font-size: 9pt;
+      color: #888;
+      padding-top: 20pt;
+    }
+
+    /* ---- TOC ---- */
+    .toc-page {
+      padding: 20mm 0;
+    }
+
+    .toc-title {
+      font-size: 16pt;
+      font-weight: 700;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 6pt;
+      margin-bottom: 16pt;
+    }
+
+    .toc-list {
+      list-style: none;
+    }
+
+    .toc-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 4pt 0;
+      border-bottom: 1px dotted #ddd;
+    }
+
+    .toc-list li a {
+      color: #1a1a1a;
+      text-decoration: none;
+    }
+
+    .toc-list li a:hover { text-decoration: underline; }
+    .toc-num { color: #555; font-size: 10pt; }
+
+    .toc-sub {
+      padding-left: 18pt;
+      font-size: 10.5pt;
+      color: #333;
+    }
+
+    /* ---- CONTENT ---- */
+    .content-page {
+      padding: 10mm 0;
+    }
+
+    h2 {
+      font-size: 16pt;
+      font-weight: 700;
+      color: #111;
+      margin: 28pt 0 10pt;
+      padding-bottom: 5pt;
+      border-bottom: 1.5px solid #ccc;
+      counter-increment: section;
+    }
+
+    h2::before {
+      content: counter(section) ". ";
+      color: #555;
+    }
+
+    h3 {
+      font-size: 13pt;
+      font-weight: 600;
+      color: #222;
+      margin: 18pt 0 7pt;
+      counter-increment: subsection;
+    }
+
+    h3::before {
+      content: counter(section) "." counter(subsection) " ";
+      color: #666;
+      font-weight: 400;
+    }
+
+    body { counter-reset: section; }
+    h2  { counter-reset: subsection; }
+
+    p {
+      margin: 8pt 0;
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    ul, ol {
+      margin: 8pt 0 8pt 22pt;
+    }
+
+    li {
+      margin: 4pt 0;
+    }
+
+    /* ---- TABLES ---- */
+    .table-wrap {
+      margin: 14pt 0;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5pt;
+    }
+
+    thead th {
+      background: #f0f0f0;
+      font-weight: 600;
+      padding: 7pt 10pt;
+      border-bottom: 2px solid #bbb;
+      text-align: left;
+    }
+
+    tbody td {
+      padding: 5pt 10pt;
+      border-bottom: 1px solid #e0e0e0;
+      vertical-align: top;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 2px solid #bbb;
+    }
+
+    caption {
+      font-size: 9.5pt;
+      color: #555;
+      margin-top: 6pt;
+      text-align: center;
+      font-style: italic;
+    }
+
+    /* ---- CODE ---- */
+    pre {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-left: 3px solid #4a90d9;
+      padding: 10pt 12pt;
+      margin: 12pt 0;
+      overflow-x: auto;
+      font-family: 'Source Code Pro', 'Courier New', monospace;
+      font-size: 9pt;
+      line-height: 1.5;
+      border-radius: 2px;
+    }
+
+    code {
+      font-family: 'Source Code Pro', 'Courier New', monospace;
+      font-size: 9.5pt;
+      background: #f0f0f0;
+      padding: 1pt 4pt;
+      border-radius: 2px;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    .caption-code {
+      font-size: 9pt;
+      color: #555;
+      margin-top: 4pt;
+      font-style: italic;
+    }
+
+    /* keywords */
+    .kw { color: #0033a0; font-weight: 600; }
+    .cm { color: #4a7c59; }
+    .st { color: #c44e0e; }
+    .an { color: #6f42c1; }
+
+    /* ---- MISC ---- */
+    .page-break { page-break-after: always; }
+    .info-box {
+      background: #f8f9fa;
+      border-left: 3px solid #4a90d9;
+      padding: 10pt 14pt;
+      margin: 12pt 0;
+      border-radius: 0 3px 3px 0;
+      font-size: 10.5pt;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== PORTADA ===== -->
+<div class="cover page-break">
+  <p class="cover-subject">Modelado y Tecnologías de Integración de Sistemas</p>
+  <p class="cover-type">Práctica Individual</p>
+
+  <hr class="cover-rule">
+  <h1 class="cover-title">Práctica 1</h1>
+  <p class="cover-subtitle">Interoperabilidad de Servicios Web</p>
+  <p class="cover-domain">Sistema de Gestión de Edificio Inteligente</p>
+  <hr class="cover-rule">
+
+  <div class="cover-meta">
+    <table>
+      <tr><td>Alumno:</td><td>Juan Ponce de León Ruiz</td></tr>
+      <tr><td>Correo:</td><td>juankyleonruiz@gmail.com</td></tr>
+      <tr><td>Fecha:</td><td>Abril de 2026</td></tr>
+    </table>
+  </div>
+
+  <p class="cover-note">Memoria descriptiva de la Práctica 1 — MTIS</p>
+</div>
+
+<!-- ===== ÍNDICE ===== -->
+<div class="container toc-page page-break">
+  <p class="toc-title">Índice</p>
+  <ul class="toc-list">
+    <li><a href="#intro">1. Introducción</a><span class="toc-num">3</span></li>
+    <li><a href="#arquitectura">2. Arquitectura del Sistema</a><span class="toc-num">3</span></li>
+    <li class="toc-sub"><a href="#soap-svcs">2.1 Servicios SOAP</a><span class="toc-num">3</span></li>
+    <li class="toc-sub"><a href="#rest-svcs">2.2 Servicios REST</a><span class="toc-num">4</span></li>
+    <li class="toc-sub"><a href="#infra">2.3 Infraestructura de soporte</a><span class="toc-num">4</span></li>
+    <li><a href="#tecnologias">3. Tecnologías Utilizadas</a><span class="toc-num">4</span></li>
+    <li><a href="#impl-soap">4. Implementación de los Servicios SOAP</a><span class="toc-num">5</span></li>
+    <li class="toc-sub"><a href="#contract-first">4.1 Enfoque contract-first y generación de código</a><span class="toc-num">5</span></li>
+    <li class="toc-sub"><a href="#wskey">4.2 Autenticación con WSKey</a><span class="toc-num">5</span></li>
+    <li class="toc-sub"><a href="#holder">4.3 Patrón Holder en JAX-WS</a><span class="toc-num">6</span></li>
+    <li class="toc-sub"><a href="#validaciones">4.4 Validaciones de documentos españoles</a><span class="toc-num">6</span></li>
+    <li><a href="#impl-rest">5. Implementación de los Servicios REST</a><span class="toc-num">7</span></li>
+    <li class="toc-sub"><a href="#openapi">5.1 Diseño de recursos y especificación OpenAPI</a><span class="toc-num">7</span></li>
+    <li class="toc-sub"><a href="#responses">5.2 Respuestas estandarizadas</a><span class="toc-num">7</span></li>
+    <li class="toc-sub"><a href="#notif">5.3 Servicio de notificaciones</a><span class="toc-num">8</span></li>
+    <li><a href="#datos">6. Modelo de Datos</a><span class="toc-num">8</span></li>
+    <li><a href="#pruebas">7. Pruebas</a><span class="toc-num">9</span></li>
+    <li><a href="#aprendizajes">8. Dificultades Encontradas y Aprendizajes</a><span class="toc-num">9</span></li>
+    <li><a href="#conclusiones">9. Conclusiones</a><span class="toc-num">11</span></li>
+  </ul>
+</div>
+
+<!-- ===== CONTENIDO ===== -->
+<div class="container content-page">
+
+  <!-- 1. Introducción -->
+  <h2 id="intro">Introducción</h2>
+
+  <p>
+    Esta memoria documenta el desarrollo de la Práctica 1 de la asignatura
+    <strong>Modelado y Tecnologías de Integración de Sistemas (MTIS)</strong>,
+    cuyo objetivo es implementar un sistema distribuido de gestión de edificio
+    inteligente haciendo uso de dos paradigmas de servicios web: <strong>SOAP</strong>
+    y <strong>REST</strong>.
+  </p>
+  <p>
+    El dominio del problema se centra en la gestión de empleados, el control de
+    acceso a salas y el seguimiento de presencia dentro de un edificio, integrando
+    además un servicio de notificaciones por correo electrónico.
+  </p>
+  <p>
+    La práctica ha supuesto un primer contacto directo con la creación de servicios
+    web interoperables desde cero: definición de contratos (WSDL y OpenAPI),
+    implementación de la lógica de negocio y despliegue de múltiples servicios que
+    comparten una misma base de datos relacional.
+  </p>
+
+  <!-- 2. Arquitectura -->
+  <h2 id="arquitectura">Arquitectura del Sistema</h2>
+
+  <p>
+    El sistema está compuesto por <strong>ocho microservicios independientes</strong>,
+    divididos en dos grupos según el protocolo que implementan.
+  </p>
+
+  <h3 id="soap-svcs">Servicios SOAP</h3>
+
+  <p>
+    Los servicios SOAP siguen un enfoque <em>contract-first</em>: primero se define
+    el contrato WSDL y a partir de él se genera el código Java mediante el plugin
+    de Apache CXF.
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Servicio</th>
+          <th>Responsabilidad</th>
+          <th>Puerto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>servicio-validaciones</code></td><td>Validación de NIF, NIE, NAF e IBAN</td><td>8081</td></tr>
+        <tr><td><code>servicio-empleados</code></td><td>CRUD de empleados</td><td>8082</td></tr>
+        <tr><td><code>servicio-control-accesos</code></td><td>Registro y consulta de accesos</td><td>8083</td></tr>
+        <tr><td><code>servicio-control-presencia</code></td><td>Seguimiento de presencia en salas</td><td>8084</td></tr>
+      </tbody>
+      <caption>Tabla 1. Servicios SOAP del sistema</caption>
+    </table>
+  </div>
+
+  <h3 id="rest-svcs">Servicios REST</h3>
+
+  <p>
+    Los servicios REST se documentan mediante especificaciones OpenAPI 3.0.3 y
+    exponen recursos a través de las operaciones HTTP estándar
+    (GET, POST, PUT, DELETE).
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Servicio</th>
+          <th>Responsabilidad</th>
+          <th>Puerto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>servicio-salas</code></td><td>Gestión de salas del edificio</td><td>8085</td></tr>
+        <tr><td><code>servicio-niveles</code></td><td>Gestión de niveles de acceso</td><td>8086</td></tr>
+        <tr><td><code>servicio-dispositivos</code></td><td>Gestión de dispositivos físicos</td><td>8087</td></tr>
+        <tr><td><code>servicio-notificaciones</code></td><td>Envío de notificaciones por email</td><td>8088</td></tr>
+      </tbody>
+      <caption>Tabla 2. Servicios REST del sistema</caption>
+    </table>
+  </div>
+
+  <h3 id="infra">Infraestructura de soporte</h3>
+
+  <p>Además de los servicios, el proyecto incluye los siguientes elementos de apoyo:</p>
+
+  <ul>
+    <li>
+      <strong>Base de datos MySQL</strong> (<code>edificio_inteligente</code>):
+      almacena todas las entidades del dominio y las claves de autenticación
+      (<em>wskeys</em>).
+    </li>
+    <li>
+      <strong>Mailpit</strong>: servidor SMTP local (puerto 1025) con interfaz web
+      (puerto 8025) para inspeccionar los correos generados por el servicio de
+      notificaciones durante el desarrollo.
+    </li>
+    <li>
+      <strong>Cliente de pruebas</strong> (<code>ClienteMain.java</code>):
+      aplicación Java que ejercita todos los servicios de forma automática y
+      secuencial.
+    </li>
+  </ul>
+
+  <!-- 3. Tecnologías -->
+  <h2 id="tecnologias">Tecnologías Utilizadas</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Tecnología</th><th>Uso en el proyecto</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Java 21</td><td>Lenguaje de implementación</td></tr>
+        <tr><td>Spring Boot 3.2.3</td><td>Framework base de todos los servicios</td></tr>
+        <tr><td>Apache CXF 4.0.3</td><td>Motor JAX-WS para servicios SOAP</td></tr>
+        <tr><td>Spring Data JPA</td><td>Acceso a base de datos (ORM)</td></tr>
+        <tr><td>MySQL 8</td><td>Base de datos relacional compartida</td></tr>
+        <tr><td>Spring Mail</td><td>Envío de notificaciones por email</td></tr>
+        <tr><td>Maven</td><td>Gestión de dependencias y build</td></tr>
+        <tr><td>Mailpit</td><td>Servidor SMTP local para desarrollo</td></tr>
+        <tr><td>SoapUI</td><td>Pruebas manuales de servicios SOAP</td></tr>
+        <tr><td>Postman</td><td>Pruebas manuales de servicios REST</td></tr>
+      </tbody>
+      <caption>Tabla 3. Tecnologías y herramientas empleadas</caption>
+    </table>
+  </div>
+
+  <!-- 4. SOAP -->
+  <h2 id="impl-soap">Implementación de los Servicios SOAP</h2>
+
+  <h3 id="contract-first">Enfoque contract-first y generación de código</h3>
+
+  <p>
+    Para los servicios SOAP se ha seguido el enfoque <em>contract-first</em>:
+    el WSDL es el punto de partida, y el plugin <code>cxf-codegen-plugin</code>
+    de Maven genera automáticamente las interfaces y clases de datos en tiempo de
+    compilación. Esto garantiza que la implementación cumple exactamente el contrato
+    publicado, sin riesgo de divergencia entre la definición del servicio y el código.
+  </p>
+
+  <p>La estructura de cada servicio SOAP es la siguiente:</p>
+
+  <pre>servicio-X/
+├── src/main/resources/wsdl/      &lt;-- Contrato WSDL
+├── src/main/java/.../config/     &lt;-- Configuración del endpoint CXF
+├── src/main/java/.../impl/       &lt;-- Lógica de negocio (implementa PortType)
+├── src/main/java/.../model/      &lt;-- Entidades JPA
+└── src/main/java/.../repository/ &lt;-- Repositorios Spring Data</pre>
+
+  <h3 id="wskey">Autenticación con WSKey</h3>
+
+  <p>
+    Todos los servicios —tanto SOAP como REST— requieren una clave de servicio
+    (<em>wskey</em>) que se valida contra la tabla <code>wskeys</code> de la base
+    de datos. Si la clave no existe o no es válida, el servicio devuelve un error
+    de autenticación sin procesar la petición. De este modo se impide el acceso
+    no autorizado sin necesidad de un mecanismo de autenticación externo.
+  </p>
+
+  <div class="info-box">
+    La clave de pruebas utilizada en el entorno de desarrollo es
+    <code>PRACTICA1_KEY_2024</code>, insertada directamente en la base de datos
+    mediante el script <code>schema.sql</code>.
+  </div>
+
+  <h3 id="holder">Patrón Holder en JAX-WS</h3>
+
+  <p>
+    Una de las particularidades de la implementación SOAP es el uso del patrón
+    <code>Holder&lt;T&gt;</code> de JAX-WS para los parámetros de salida. Dado
+    que Java no permite devolver múltiples valores de forma nativa, los parámetros
+    anotados con <code>@WebParam(mode = Mode.OUT)</code> se pasan como
+    <code>Holder&lt;T&gt;</code>, y el framework los mapea automáticamente al
+    XML de respuesta SOAP.
+  </p>
+
+  <pre><span class="an">@Override</span>
+<span class="kw">public void</span> validarNIF(
+    <span class="an">@WebParam</span>(name = <span class="st">"wskey"</span>) String wskey,
+    <span class="an">@WebParam</span>(name = <span class="st">"nif"</span>)   String nif,
+    <span class="an">@WebParam</span>(name = <span class="st">"resultado"</span>, mode = Mode.OUT)
+        Holder&lt;Boolean&gt; resultado,
+    <span class="an">@WebParam</span>(name = <span class="st">"mensaje"</span>, mode = Mode.OUT)
+        Holder&lt;String&gt; mensaje) {
+
+    <span class="kw">if</span> (!wskeyRepository.existsByClave(wskey)) {
+        resultado.value = <span class="kw">false</span>;
+        mensaje.value = <span class="st">"WSKey no válida"</span>;
+        <span class="kw">return</span>;
+    }
+    <span class="cm">// ... lógica de validación</span>
+}</pre>
+  <p class="caption-code">Fragmento: firma con Holder en ValidacionesImpl.java</p>
+
+  <h3 id="validaciones">Validaciones de documentos españoles</h3>
+
+  <p>
+    El servicio <code>servicio-validaciones</code> implementa algoritmos de
+    verificación para cuatro tipos de documentos:
+  </p>
+
+  <ul>
+    <li>
+      <strong>NIF</strong>: 8 dígitos + 1 letra verificadora, calculada como el
+      módulo 23 del número sobre la tabla
+      <code>TRWAGMYFPDXBNJZSQVHLCKE</code>.
+    </li>
+    <li>
+      <strong>NIE</strong>: letra inicial (X/Y/Z) + 7 dígitos + letra
+      verificadora. Se sustituye X→0, Y→1, Z→2 y se aplica el mismo algoritmo
+      que el NIF.
+    </li>
+    <li>
+      <strong>NAF</strong>: 12 dígitos; los dos últimos son el resultado de
+      calcular módulo 97 sobre los diez primeros dígitos.
+    </li>
+    <li>
+      <strong>IBAN</strong>: 24 caracteres para el formato español
+      (ES + 22 dígitos); verificación conforme a ISO 13616 mediante
+      reordenamiento y módulo 97.
+    </li>
+  </ul>
+
+  <!-- 5. REST -->
+  <h2 id="impl-rest">Implementación de los Servicios REST</h2>
+
+  <h3 id="openapi">Diseño de recursos y especificación OpenAPI</h3>
+
+  <p>
+    Los servicios REST exponen recursos siguiendo las convenciones HTTP. Cada
+    servicio cuenta con su especificación OpenAPI 3.0.3 en formato YAML, que
+    documenta todos los endpoints, parámetros, cuerpos de petición y respuestas
+    posibles antes de comenzar la implementación Java.
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>GET</td><td><code>/api/salas/{codigosala}</code></td><td>Obtener una sala por código</td></tr>
+        <tr><td>POST</td><td><code>/api/salas</code></td><td>Crear una nueva sala</td></tr>
+        <tr><td>PUT</td><td><code>/api/salas/{codigosala}</code></td><td>Actualizar los datos de una sala</td></tr>
+        <tr><td>DELETE</td><td><code>/api/salas/{codigosala}</code></td><td>Eliminar una sala</td></tr>
+      </tbody>
+      <caption>Tabla 4. Endpoints de ejemplo — servicio-salas</caption>
+    </table>
+  </div>
+
+  <h3 id="responses">Respuestas estandarizadas</h3>
+
+  <p>
+    Todos los servicios REST devuelven un objeto JSON con los campos
+    <code>codigo</code> y <code>mensaje</code>, además del recurso solicitado
+    en las operaciones de consulta. Los códigos de estado HTTP usados son los
+    estándar:
+  </p>
+
+  <ul>
+    <li><code>200 OK</code> — operación completada con éxito.</li>
+    <li><code>201 Created</code> — recurso creado.</li>
+    <li><code>400 Bad Request</code> — datos de entrada inválidos.</li>
+    <li><code>401 Unauthorized</code> — wskey ausente o inválida.</li>
+    <li><code>404 Not Found</code> — recurso no encontrado.</li>
+    <li><code>409 Conflict</code> — conflicto con un recurso existente (clave duplicada).</li>
+  </ul>
+
+  <h3 id="notif">Servicio de notificaciones</h3>
+
+  <p>
+    El servicio <code>servicio-notificaciones</code> utiliza
+    <strong>Spring Mail</strong> para enviar correos electrónicos en tres situaciones:
+  </p>
+
+  <ol>
+    <li>Validación exitosa de un usuario — <code>POST /api/notificaciones/usuario-valido/{nif}</code>.</li>
+    <li>Notificación de error — <code>POST /api/notificaciones/error</code>.</li>
+    <li>Cambio de presencia en una sala — <code>POST /api/notificaciones/presencia-sala</code>.</li>
+  </ol>
+
+  <p>
+    En el entorno de desarrollo se emplea Mailpit como servidor SMTP local, lo que
+    permite verificar los correos sin necesidad de un servidor de correo real. La
+    interfaz web de Mailpit (puerto 8025) muestra los mensajes recibidos en tiempo
+    real.
+  </p>
+
+  <!-- 6. Modelo de datos -->
+  <h2 id="datos">Modelo de Datos</h2>
+
+  <p>
+    La base de datos MySQL <code>edificio_inteligente</code> contiene las siguientes
+    tablas:
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Tabla</th>
+          <th>Clave primaria</th>
+          <th>Descripción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>empleados</code></td><td><code>nif</code></td><td>Datos de los empleados del edificio</td></tr>
+        <tr><td><code>niveles</code></td><td><code>nivel</code> (entero)</td><td>Niveles de acceso (1=General, 2=Restringido, 3=Alta seguridad)</td></tr>
+        <tr><td><code>salas</code></td><td><code>codigosala</code></td><td>Salas del edificio, asociadas a un nivel de acceso</td></tr>
+        <tr><td><code>dispositivos</code></td><td><code>codigodispositivo</code></td><td>Dispositivos de control instalados en cada sala</td></tr>
+        <tr><td><code>controlaccesos</code></td><td><code>id</code> (autoincremental)</td><td>Historial de eventos de acceso</td></tr>
+        <tr><td><code>controlpresencia</code></td><td><code>(nif, codigosala)</code></td><td>Presencia actual de empleados en salas</td></tr>
+        <tr><td><code>wskeys</code></td><td><code>id</code> (autoincremental)</td><td>Claves de autenticación de los servicios web</td></tr>
+      </tbody>
+      <caption>Tabla 5. Tablas de la base de datos</caption>
+    </table>
+  </div>
+
+  <p>
+    La tabla <code>controlpresencia</code> utiliza una clave primaria compuesta
+    <code>(nif, codigosala)</code> para garantizar que cada empleado no pueda
+    aparecer registrado más de una vez en la misma sala de forma simultánea.
+    A diferencia de <code>controlaccesos</code>, que es un registro histórico,
+    <code>controlpresencia</code> refleja el estado en tiempo real.
+  </p>
+
+  <!-- 7. Pruebas -->
+  <h2 id="pruebas">Pruebas</h2>
+
+  <h3>Pruebas manuales</h3>
+
+  <p>Las pruebas manuales se han realizado con las siguientes herramientas:</p>
+
+  <ul>
+    <li>
+      <strong>SoapUI</strong> — servicios SOAP. Se construyen peticiones XML
+      con la wskey correcta e incorrecta, verificando tanto el flujo nominal
+      como los casos de error: NIF inválido, empleado inexistente, intento de
+      duplicado, etc.
+    </li>
+    <li>
+      <strong>Postman</strong> — servicios REST. Se cubren todos los verbos HTTP
+      y se verifica que los códigos de estado de respuesta corresponden a los
+      definidos en la especificación OpenAPI.
+    </li>
+    <li>
+      <strong>Mailpit</strong> (interfaz web en <code>http://localhost:8025</code>)
+      — para confirmar que los correos generados por el servicio de notificaciones
+      llegan correctamente con el contenido esperado.
+    </li>
+  </ul>
+
+  <h3>Cliente de pruebas automáticas</h3>
+
+  <p>
+    El módulo <code>cliente/</code> contiene la clase <code>ClienteMain.java</code>,
+    que ejercita todos los servicios de forma secuencial. Para los servicios SOAP
+    utiliza <code>JaxWsProxyFactoryBean</code> de Apache CXF; para los REST, el
+    cliente HTTP nativo de Java (<code>java.net.http.HttpClient</code>, disponible
+    desde Java 11).
+  </p>
+
+  <!-- 8. Dificultades y aprendizajes -->
+  <h2 id="aprendizajes">Dificultades Encontradas y Aprendizajes</h2>
+
+  <p>
+    Esta práctica ha sido mi primer desarrollo completo de servicios web
+    interoperables, lo que ha implicado un proceso de aprendizaje progresivo
+    en varias áreas.
+  </p>
+
+  <h3>SOAP y JAX-WS</h3>
+
+  <p>
+    El principal obstáculo con SOAP fue comprender el modelo de programación de
+    JAX-WS, en particular el patrón <code>Holder&lt;T&gt;</code> para parámetros
+    de salida. Inicialmente intenté devolver los valores de respuesta directamente
+    como resultado del método, lo que no funciona cuando el WSDL define múltiples
+    parámetros de salida. Una vez entendido que JAX-WS mapea los parámetros
+    <em>OUT</em> mediante <code>Holder</code>, la implementación resultó coherente
+    con el contrato.
+  </p>
+
+  <p>
+    También fue necesario comprender la diferencia entre el enfoque
+    <em>contract-first</em> (WSDL → código) y el enfoque <em>code-first</em>
+    (código → WSDL), y por qué el primero es preferible en entornos de
+    interoperabilidad real: el contrato es independiente del lenguaje de
+    implementación y puede ser consumido por clientes escritos en cualquier
+    plataforma.
+  </p>
+
+  <h3>REST y OpenAPI</h3>
+
+  <p>
+    La parte REST fue más accesible gracias a la familiaridad con Spring MVC.
+    La principal lección fue la importancia de diseñar bien el contrato OpenAPI
+    antes de implementar: los cambios posteriores en los endpoints obligan a
+    actualizar tanto el código como la especificación, lo que genera trabajo
+    adicional que se puede evitar con un buen diseño previo.
+  </p>
+
+  <h3>Configuración del entorno distribuido</h3>
+
+  <p>
+    La gestión de ocho servicios independientes, cada uno con su propio puerto
+    y configuración, exigió atención en el orden de arranque —la base de datos
+    debe estar disponible antes que cualquier servicio— y en la consistencia de
+    las credenciales en todos los ficheros <code>application.properties</code>.
+  </p>
+
+  <p>
+    Un error concreto fue configurar el puerto SMTP a 25 en lugar de 1025
+    (el que utiliza Mailpit por defecto). Detectarlo requirió revisar los logs
+    de Spring Mail, lo que fue una buena práctica para aprender a diagnosticar
+    problemas en sistemas distribuidos.
+  </p>
+
+  <h3>Validaciones de documentos</h3>
+
+  <p>
+    Implementar los algoritmos de validación de NIF, NIE, NAF e IBAN desde cero
+    supuso consultar la normativa española correspondiente y contrastar los
+    resultados con validadores externos para asegurar la corrección de los cálculos.
+    Fue un ejercicio útil para entender que los servicios de validación deben ser
+    rigurosos: un error en el algoritmo podría rechazar documentos válidos o aceptar
+    documentos inválidos.
+  </p>
+
+  <h3>Reflexión general</h3>
+
+  <p>
+    La práctica ha permitido comprender en la práctica por qué la interoperabilidad
+    es un problema relevante en sistemas distribuidos: cuando los servicios están
+    implementados con tecnologías distintas, el contrato (WSDL u OpenAPI) es el
+    único elemento que garantiza que un cliente puede comunicarse con un servidor
+    sin conocer sus detalles internos.
+  </p>
+
+  <p>
+    Haber trabajado con ambos paradigmas en paralelo ha hecho más clara la diferencia
+    en su filosofía de diseño: SOAP orientado a operaciones con tipado fuerte y
+    contratos explícitos, REST orientado a recursos con un modelo más simple y
+    flexible. Cada uno tiene su contexto de aplicación, y conocer ambos permite
+    elegir el más adecuado según los requisitos del sistema.
+  </p>
+
+  <!-- 9. Conclusiones -->
+  <h2 id="conclusiones">Conclusiones</h2>
+
+  <p>
+    La Práctica 1 ha resultado en un sistema funcional compuesto por ocho servicios
+    web que cubren las necesidades de gestión de un edificio inteligente. Los
+    objetivos planteados —implementar servicios SOAP y REST, definir contratos
+    previos a la implementación, compartir una base de datos relacional y añadir
+    autenticación mediante wskey— se han cumplido en su totalidad.
+  </p>
+
+  <p>
+    Desde el punto de vista formativo, el desarrollo ha consolidado conceptos
+    teóricos de la asignatura sobre interoperabilidad y ha introducido el uso de
+    herramientas y frameworks habituales en el sector profesional: Apache CXF,
+    Spring Boot, Spring Data JPA y OpenAPI. La experiencia de depurar un sistema
+    distribuido con múltiples servicios también ha resultado formativa, ya que los
+    errores pueden originarse en cualquier capa (red, configuración, lógica de
+    negocio) y localizarlos requiere una metodología ordenada.
+  </p>
+
+  <p>
+    En definitiva, la práctica ha servido para trasladar los conceptos de
+    interoperabilidad al plano práctico, con un sistema que, aunque está en un
+    entorno local de desarrollo, refleja el tipo de arquitectura que se encuentra
+    en sistemas reales de gestión empresarial.
+  </p>
+
+</div>
+
+</body>
+</html>

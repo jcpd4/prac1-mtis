@@ -4,27 +4,30 @@ import com.practica1.cliente.soap.validaciones.*;
 import com.practica1.cliente.soap.empleados.*;
 import com.practica1.cliente.soap.controlaccesos.*;
 import com.practica1.cliente.soap.controlpresencia.*;
+import jakarta.xml.ws.Holder;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
+import java.util.GregorianCalendar;
 
 /**
- * Aplicación cliente que prueba todos los servicios SOAP y REST de la Práctica 1.
- *
- * Requisito: todos los servicios deben estar arrancados antes de ejecutar.
- *   - Validaciones:    http://localhost:8081/ws/validaciones
- *   - Empleados:       http://localhost:8082/ws/empleados
- *   - ControlAccesos:  http://localhost:8083/ws/controlaccesos
- *   - ControlPresencia:http://localhost:8084/ws/controlpresencia
- *   - Salas REST:      http://localhost:8085/api/salas
- *   - Niveles REST:    http://localhost:8086/api/niveles
- *   - Dispositivos REST:http://localhost:8087/api/dispositivos
- *   - Notificaciones:  http://localhost:8088/api/notificaciones
+ * Cliente de prueba para todos los servicios SOAP y REST de la Práctica 1.
+ * Todos los servicios deben estar arrancados antes de ejecutar:
+ *   Validaciones    http://localhost:8081/ws/validaciones
+ *   Empleados       http://localhost:8082/ws/empleados
+ *   ControlAccesos  http://localhost:8083/ws/controlaccesos
+ *   ControlPresencia http://localhost:8084/ws/controlpresencia
+ *   Salas REST      http://localhost:8085/api/salas
+ *   Niveles REST    http://localhost:8086/api/niveles
+ *   Dispositivos REST http://localhost:8087/api/dispositivos
+ *   Notificaciones  http://localhost:8088/api/notificaciones
  */
 public class ClienteMain {
 
@@ -50,7 +53,7 @@ public class ClienteMain {
     }
 
     // ================================================================
-    // SERVICIOS SOAP
+    // SOAP: Validaciones
     // ================================================================
 
     private static void probarValidaciones() {
@@ -58,52 +61,49 @@ public class ClienteMain {
         ValidacionesPortType svc = crearClienteSoap(ValidacionesPortType.class,
                 "http://localhost:8081/ws/validaciones");
 
-        // NIF válido
-        ValidarNIF reqNif = new ValidarNIF();
-        reqNif.setNif("33900165M");
-        reqNif.setWskey(WS_KEY);
-        ValidarNIFResponse rNif = svc.validarNIF(reqNif);
-        System.out.println("validarNIF(33900165M) -> " + rNif.isMensaje() + " | " + rNif.getMensaje());
+        Holder<Boolean> resultado = new Holder<>();
+        Holder<String> mensaje = new Holder<>();
 
-        // NIE válido
-        ValidarNIE reqNie = new ValidarNIE();
-        reqNie.setNie("Z9817136M");
-        reqNie.setWskey(WS_KEY);
-        ValidarNIEResponse rNie = svc.validarNIE(reqNie);
-        System.out.println("validarNIE(Z9817136M) -> " + rNie.isMensaje() + " | " + rNie.getMensaje());
+        svc.validarNIF("33900165M", WS_KEY, resultado, mensaje);
+        System.out.println("validarNIF(33900165M) -> " + resultado.value + " | " + mensaje.value);
 
-        // NAF válido
-        ValidarNAF reqNaf = new ValidarNAF();
-        reqNaf.setNaf("527575965274");
-        reqNaf.setWskey(WS_KEY);
-        ValidarNAFResponse rNaf = svc.validarNAF(reqNaf);
-        System.out.println("validarNAF(527575965274) -> " + rNaf.isMensaje() + " | " + rNaf.getMensaje());
+        svc.validarNIE("Z9817136M", WS_KEY, resultado, mensaje);
+        System.out.println("validarNIE(Z9817136M) -> " + resultado.value + " | " + mensaje.value);
 
-        // IBAN válido
-        ValidarIBAN reqIban = new ValidarIBAN();
-        reqIban.setIban("ES0690000001210123456789");
-        reqIban.setWskey(WS_KEY);
-        ValidarIBANResponse rIban = svc.validarIBAN(reqIban);
-        System.out.println("validarIBAN(ES0690000001210123456789) -> " + rIban.isMensaje() + " | " + rIban.getMensaje());
+        svc.validarNAF("527575965274", WS_KEY, resultado, mensaje);
+        System.out.println("validarNAF(527575965274) -> " + resultado.value + " | " + mensaje.value);
+
+        svc.validarIBAN("ES0690000001210123456789", WS_KEY, resultado, mensaje);
+        System.out.println("validarIBAN(ES0690000001210123456789) -> " + resultado.value + " | " + mensaje.value);
+
+        // WSKey inválida
+        svc.validarNIF("33900165M", "WSKEY_INVALIDA", resultado, mensaje);
+        System.out.println("validarNIF(wskey inválida) -> " + resultado.value + " | " + mensaje.value);
+
         System.out.println();
     }
+
+    // ================================================================
+    // SOAP: Empleados
+    // ================================================================
 
     private static void probarEmpleados() {
         System.out.println("--- Servicio SOAP: Empleados ---");
         EmpleadosPortType svc = crearClienteSoap(EmpleadosPortType.class,
                 "http://localhost:8082/ws/empleados");
 
+        Holder<Boolean> resultado = new Holder<>();
+        Holder<String> mensaje = new Holder<>();
+        Holder<com.practica1.cliente.soap.empleados.EmpleadoType> empleadoHolder = new Holder<>();
+
         // Consultar empleado existente
-        Consultar reqCons = new Consultar();
-        reqCons.setNif("33900165M");
-        reqCons.setWskey(WS_KEY);
-        ConsultarResponse rCons = svc.consultar(reqCons);
-        System.out.println("consultar(33900165M) -> " + rCons.getMensaje());
-        if (rCons.getEmpleado() != null)
-            System.out.println("  Nombre: " + rCons.getEmpleado().getNombre() + " " + rCons.getEmpleado().getApellidos());
+        svc.consultar("33900165M", WS_KEY, empleadoHolder, mensaje);
+        System.out.println("consultar(33900165M) -> " + mensaje.value);
+        if (empleadoHolder.value != null)
+            System.out.println("  Nombre: " + empleadoHolder.value.getNombre() + " " + empleadoHolder.value.getApellidos());
 
         // Nuevo empleado de prueba
-        EmpleadoType emp = new EmpleadoType();
+        com.practica1.cliente.soap.empleados.EmpleadoType emp = new com.practica1.cliente.soap.empleados.EmpleadoType();
         emp.setNif("12345678Z");
         emp.setNombre("María");
         emp.setApellidos("Pérez Ruiz");
@@ -112,147 +112,180 @@ public class ClienteMain {
         emp.setIban("ES9121000418450200051332");
         emp.setTipoDocumento("NIF");
 
-        Nuevo reqNuevo = new Nuevo();
-        reqNuevo.setEmpleado(emp);
-        reqNuevo.setWskey(WS_KEY);
-        NuevoResponse rNuevo = svc.nuevo(reqNuevo);
-        System.out.println("nuevo(12345678Z) -> " + rNuevo.getMensaje());
+        svc.nuevo(emp, WS_KEY, resultado, mensaje);
+        System.out.println("nuevo(12345678Z) -> " + resultado.value + " | " + mensaje.value);
+
+        // Modificar empleado
+        emp.setEmail("maria.modificada@empresa.com");
+        svc.modificar(emp, WS_KEY, resultado, mensaje);
+        System.out.println("modificar(12345678Z) -> " + resultado.value + " | " + mensaje.value);
+
+        // Borrar empleado de prueba
+        svc.borrar("12345678Z", WS_KEY, resultado, mensaje);
+        System.out.println("borrar(12345678Z) -> " + resultado.value + " | " + mensaje.value);
+
         System.out.println();
     }
 
-    private static void probarControlAccesos() {
+    // ================================================================
+    // SOAP: ControlAccesos
+    // ================================================================
+
+    private static void probarControlAccesos() throws Exception {
         System.out.println("--- Servicio SOAP: ControlAccesos ---");
         ControlAccesosPortType svc = crearClienteSoap(ControlAccesosPortType.class,
                 "http://localhost:8083/ws/controlaccesos");
 
-        Registrar req = new Registrar();
-        req.setNif("33900165M");
-        req.setCodigosala("S001");
-        req.setCodigodispositivo("D001");
-        req.setWskey(WS_KEY);
-        RegistrarResponse r = svc.registrar(req);
-        System.out.println("registrar acceso -> " + r.getMensaje());
+        Holder<Boolean> resultado = new Holder<>();
+        Holder<String> mensaje = new Holder<>();
+
+        svc.registrar("33900165M", "S001", "D001", WS_KEY, resultado, mensaje);
+        System.out.println("registrar acceso -> " + resultado.value + " | " + mensaje.value);
+
+        // Consultar con rango de fechas
+        Holder<com.practica1.cliente.soap.controlaccesos.ListaRegistrosType> registros = new Holder<>();
+        XMLGregorianCalendar desde = toXmlCalendar(LocalDateTime.now().minusDays(1));
+        XMLGregorianCalendar hasta = toXmlCalendar(LocalDateTime.now().plusDays(1));
+        svc.consultar("33900165M", null, null, desde, hasta, WS_KEY, registros, mensaje);
+        System.out.println("consultar accesos -> " + mensaje.value);
+        if (registros.value != null)
+            System.out.println("  Registros: " + registros.value.getRegistro().size());
+
         System.out.println();
     }
+
+    // ================================================================
+    // SOAP: ControlPresencia
+    // ================================================================
 
     private static void probarControlPresencia() {
         System.out.println("--- Servicio SOAP: ControlPresencia ---");
         ControlPresenciaPortType svc = crearClienteSoap(ControlPresenciaPortType.class,
                 "http://localhost:8084/ws/controlpresencia");
 
-        Registrar reqReg = new Registrar();
-        reqReg.setNif("33900165M");
-        reqReg.setCodigosala("S001");
-        reqReg.setWskey(WS_KEY);
-        RegistrarResponse rReg = svc.registrar(reqReg);
-        System.out.println("registrar presencia -> " + rReg.getMensaje());
+        Holder<Boolean> resultado = new Holder<>();
+        Holder<String> mensaje = new Holder<>();
 
-        ControlEmpleadosSala reqSala = new ControlEmpleadosSala();
-        reqSala.setCodigosala("S001");
-        reqSala.setWskey(WS_KEY);
-        ControlEmpleadosSalaResponse rSala = svc.controlEmpleadosSala(reqSala);
-        System.out.println("controlEmpleadosSala(S001) -> " + rSala.getMensaje());
+        svc.registrar("33900165M", "S001", WS_KEY, resultado, mensaje);
+        System.out.println("registrar presencia -> " + resultado.value + " | " + mensaje.value);
+
+        Holder<com.practica1.cliente.soap.controlpresencia.ListaEmpleadosType> empleados = new Holder<>();
+        svc.controlEmpleadosSala("S001", WS_KEY, empleados, mensaje);
+        System.out.println("controlEmpleadosSala(S001) -> " + mensaje.value);
+        if (empleados.value != null)
+            System.out.println("  Empleados en sala: " + empleados.value.getEmpleado().size());
+
+        svc.eliminar("33900165M", "S001", WS_KEY, resultado, mensaje);
+        System.out.println("eliminar presencia -> " + resultado.value + " | " + mensaje.value);
+
         System.out.println();
     }
 
     // ================================================================
-    // SERVICIOS REST
+    // REST: Salas
     // ================================================================
 
     private static void probarSalasRest() throws Exception {
         System.out.println("--- Servicio REST: Salas ---");
         HttpClient client = HttpClient.newHttpClient();
 
-        // GET sala existente
-        HttpRequest req = HttpRequest.newBuilder()
+        HttpResponse<String> resp = client.send(HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8085/api/salas/S001"))
-                .header("wskey", WS_KEY)
-                .GET().build();
-        HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                .header("wskey", WS_KEY).GET().build(),
+                HttpResponse.BodyHandlers.ofString());
         System.out.println("GET /salas/S001 -> " + resp.statusCode() + " | " + resp.body());
 
-        // POST nueva sala
-        String body = """
-                {"codigosala":"S099","nombre":"Sala de prueba","nivel":1}
-                """;
-        HttpRequest postReq = HttpRequest.newBuilder()
+        String body = "{\"codigosala\":\"S099\",\"nombre\":\"Sala de prueba\",\"nivel\":1}";
+        HttpResponse<String> postResp = client.send(HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8085/api/salas"))
-                .header("wskey", WS_KEY)
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(body)).build();
-        HttpResponse<String> postResp = client.send(postReq, HttpResponse.BodyHandlers.ofString());
+                .header("wskey", WS_KEY).header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body)).build(),
+                HttpResponse.BodyHandlers.ofString());
         System.out.println("POST /salas -> " + postResp.statusCode() + " | " + postResp.body());
 
-        // DELETE sala de prueba
-        HttpRequest delReq = HttpRequest.newBuilder()
+        HttpResponse<String> delResp = client.send(HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8085/api/salas/S099"))
-                .header("wskey", WS_KEY)
-                .DELETE().build();
-        HttpResponse<String> delResp = client.send(delReq, HttpResponse.BodyHandlers.ofString());
+                .header("wskey", WS_KEY).DELETE().build(),
+                HttpResponse.BodyHandlers.ofString());
         System.out.println("DELETE /salas/S099 -> " + delResp.statusCode() + " | " + delResp.body());
+
         System.out.println();
     }
+
+    // ================================================================
+    // REST: Niveles
+    // ================================================================
 
     private static void probarNivelesRest() throws Exception {
         System.out.println("--- Servicio REST: Niveles ---");
         HttpClient client = HttpClient.newHttpClient();
 
-        HttpRequest req = HttpRequest.newBuilder()
+        HttpResponse<String> resp = client.send(HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8086/api/niveles/1"))
-                .header("wskey", WS_KEY)
-                .GET().build();
-        HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                .header("wskey", WS_KEY).GET().build(),
+                HttpResponse.BodyHandlers.ofString());
         System.out.println("GET /niveles/1 -> " + resp.statusCode() + " | " + resp.body());
+
         System.out.println();
     }
+
+    // ================================================================
+    // REST: Dispositivos
+    // ================================================================
 
     private static void probarDispositivosRest() throws Exception {
         System.out.println("--- Servicio REST: Dispositivos ---");
         HttpClient client = HttpClient.newHttpClient();
 
-        HttpRequest req = HttpRequest.newBuilder()
+        HttpResponse<String> resp = client.send(HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8087/api/dispositivos/D001"))
-                .header("wskey", WS_KEY)
-                .GET().build();
-        HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                .header("wskey", WS_KEY).GET().build(),
+                HttpResponse.BodyHandlers.ofString());
         System.out.println("GET /dispositivos/D001 -> " + resp.statusCode() + " | " + resp.body());
+
         System.out.println();
     }
+
+    // ================================================================
+    // REST: Notificaciones
+    // ================================================================
 
     private static void probarNotificacionesRest() throws Exception {
         System.out.println("--- Servicio REST: Notificaciones ---");
         HttpClient client = HttpClient.newHttpClient();
 
-        // NotificarUsuarioValido
-        HttpRequest req = HttpRequest.newBuilder()
+        HttpResponse<String> resp = client.send(HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8088/api/notificaciones/usuario-valido/33900165M"))
                 .header("wskey", WS_KEY)
-                .POST(HttpRequest.BodyPublishers.noBody()).build();
-        HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                .POST(HttpRequest.BodyPublishers.noBody()).build(),
+                HttpResponse.BodyHandlers.ofString());
         System.out.println("POST /notificaciones/usuario-valido/33900165M -> " + resp.statusCode() + " | " + resp.body());
 
-        // NotificarError
-        String body = """
-                {"nif":"33900165M","error":"Error de prueba desde el cliente"}
-                """;
-        HttpRequest errReq = HttpRequest.newBuilder()
+        String errBody = "{\"nif\":\"33900165M\",\"error\":\"Error de prueba desde el cliente\"}";
+        HttpResponse<String> errResp = client.send(HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8088/api/notificaciones/error"))
-                .header("wskey", WS_KEY)
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(body)).build();
-        HttpResponse<String> errResp = client.send(errReq, HttpResponse.BodyHandlers.ofString());
+                .header("wskey", WS_KEY).header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(errBody)).build(),
+                HttpResponse.BodyHandlers.ofString());
         System.out.println("POST /notificaciones/error -> " + errResp.statusCode() + " | " + errResp.body());
+
         System.out.println();
     }
 
     // ================================================================
-    // Helper: crea un proxy CXF para un servicio SOAP
+    // Helpers
     // ================================================================
+
     @SuppressWarnings("unchecked")
     private static <T> T crearClienteSoap(Class<T> serviceClass, String url) {
         JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
         factory.setServiceClass(serviceClass);
         factory.setAddress(url);
         return (T) factory.create();
+    }
+
+    private static XMLGregorianCalendar toXmlCalendar(LocalDateTime ldt) throws Exception {
+        GregorianCalendar gc = GregorianCalendar.from(ldt.atZone(ZoneId.systemDefault()));
+        return DatatypeFactory.newInstance().newXMLGregorianCalendar(gc);
     }
 }

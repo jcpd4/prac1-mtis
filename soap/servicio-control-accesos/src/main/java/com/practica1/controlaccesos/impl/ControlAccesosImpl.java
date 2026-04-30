@@ -1,10 +1,13 @@
 package com.practica1.controlaccesos.impl;
 
-import com.practica1.controlaccesos.generated.*;
+import com.practica1.controlaccesos.generated.ControlAccesosPortType;
+import com.practica1.controlaccesos.generated.ListaRegistrosType;
+import com.practica1.controlaccesos.generated.RegistroAccesoType;
 import com.practica1.controlaccesos.model.ControlAcceso;
 import com.practica1.controlaccesos.repository.ControlAccesoRepository;
 import com.practica1.controlaccesos.repository.WskeyRepository;
 import jakarta.jws.WebService;
+import jakarta.xml.ws.Holder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,52 +32,38 @@ public class ControlAccesosImpl implements ControlAccesosPortType {
     @Autowired private WskeyRepository wskeyRepo;
 
     @Override
-    public RegistrarResponse registrar(Registrar parameters) {
-        RegistrarResponse r = new RegistrarResponse();
-
-        if (!wskeyRepo.existsByClave(parameters.getWskey())) {
-            r.setResultado(false);
-            r.setMensaje("ERROR: WSKey inválida.");
-            return r;
+    public void registrar(String nif, String codigosala, String codigodispositivo, String wskey,
+                          Holder<Boolean> resultado, Holder<String> mensaje) {
+        if (!wskeyRepo.existsByClave(wskey)) {
+            resultado.value = false; mensaje.value = "ERROR: WSKey inválida."; return;
         }
-
         try {
             ControlAcceso ca = new ControlAcceso();
-            ca.setNif(parameters.getNif());
-            ca.setCodigosala(parameters.getCodigosala());
-            ca.setCodigodispositivo(parameters.getCodigodispositivo());
+            ca.setNif(nif);
+            ca.setCodigosala(codigosala);
+            ca.setCodigodispositivo(codigodispositivo);
             ca.setFechahora(LocalDateTime.now());
             repo.save(ca);
-            r.setResultado(true);
-            r.setMensaje("OK: Acceso registrado. ID=" + ca.getId());
+            resultado.value = true; mensaje.value = "OK: Acceso registrado. ID=" + ca.getId();
         } catch (Exception ex) {
-            r.setResultado(false);
-            r.setMensaje("ERROR: " + ex.getMessage());
+            resultado.value = false; mensaje.value = "ERROR: " + ex.getMessage();
         }
-        return r;
     }
 
     @Override
-    public ConsultarResponse consultar(Consultar parameters) {
-        ConsultarResponse r = new ConsultarResponse();
-
-        if (!wskeyRepo.existsByClave(parameters.getWskey())) {
-            r.setMensaje("ERROR: WSKey inválida.");
-            r.setRegistros(new ListaRegistrosType());
-            return r;
+    public void consultar(String nif, String codigosala, String codigodispositivo,
+                          XMLGregorianCalendar fechaDesde, XMLGregorianCalendar fechaHasta, String wskey,
+                          Holder<ListaRegistrosType> registros, Holder<String> mensaje) {
+        registros.value = new ListaRegistrosType();
+        if (!wskeyRepo.existsByClave(wskey)) {
+            mensaje.value = "ERROR: WSKey inválida."; return;
         }
-
         try {
-            LocalDateTime desde = toLocalDateTime(parameters.getFechaDesde());
-            LocalDateTime hasta = toLocalDateTime(parameters.getFechaHasta());
+            LocalDateTime desde = fechaDesde != null ? toLocalDateTime(fechaDesde) : null;
+            LocalDateTime hasta = fechaHasta != null ? toLocalDateTime(fechaHasta) : null;
 
-            List<ControlAcceso> lista = repo.buscarConFiltros(
-                    parameters.getNif(),
-                    parameters.getCodigosala(),
-                    parameters.getCodigodispositivo(),
-                    desde, hasta);
+            List<ControlAcceso> lista = repo.buscarConFiltros(nif, codigosala, codigodispositivo, desde, hasta);
 
-            ListaRegistrosType listaType = new ListaRegistrosType();
             for (ControlAcceso ca : lista) {
                 RegistroAccesoType reg = new RegistroAccesoType();
                 reg.setId(ca.getId());
@@ -82,16 +71,12 @@ public class ControlAccesosImpl implements ControlAccesosPortType {
                 reg.setCodigosala(ca.getCodigosala());
                 reg.setCodigodispositivo(ca.getCodigodispositivo());
                 reg.setFechahora(toXmlCalendar(ca.getFechahora()));
-                listaType.getRegistro().add(reg);
+                registros.value.getRegistro().add(reg);
             }
-
-            r.setRegistros(listaType);
-            r.setMensaje("OK: " + lista.size() + " registro(s) encontrado(s).");
+            mensaje.value = "OK: " + lista.size() + " registro(s) encontrado(s).";
         } catch (Exception ex) {
-            r.setMensaje("ERROR: " + ex.getMessage());
-            r.setRegistros(new ListaRegistrosType());
+            mensaje.value = "ERROR: " + ex.getMessage();
         }
-        return r;
     }
 
     private LocalDateTime toLocalDateTime(XMLGregorianCalendar cal) {
